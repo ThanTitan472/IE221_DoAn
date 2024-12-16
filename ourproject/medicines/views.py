@@ -193,17 +193,106 @@ class UserView:
         messages.success(request, 'Tài khoản đã được xóa thành công.')
         return redirect('/manage/users')
     return render(request, 'confirm_delete_user.html', {'user': user})
+  
+# class BaseView:
+#   model = None
+#   form_class = None
+#   template_prefix = ""
+
+#   def show_list(self, request):
+#     obj_list = self.model.objects.all()
+#     form_list = []
+#     for obj in obj_list:
+#       form = self.form_class(instance=obj)
+#       for field in form:
+#           field.is_date = isinstance(field.field, DateField)
+        
+#       url_update = reverse(f"medicines:update-{self.template_prefix}", kwargs={'key_id': obj.pk})
+#       url_delete = reverse(f"medicines:delete-{self.template_prefix}", kwargs={'key_id': obj.pk})
+        
+        
+#       form_list.append({
+#           'form': form,
+#           'url_update': url_update,
+#           'url_delete': url_delete
+#       })
+    
+    
+#     return render(request,'show_medicine.html', {'form_list': form_list})
+
+#   def add_object(self, request):
+#     if request.method == 'POST':
+#       form = self.form_class(request.POST)
+#       if form.is_valid():
+#         form.save()
+#         form = self.form_class()
+#     else:
+#       form = self.form_class()
+#     return render(request, 'add_medicine.html', {'form': form})
+
+#   def update_object(self, request, key_id):
+#     row = get_object_or_404(self.model, pk=key_id)
+#     if request.method == 'POST':
+#       form = self.form_class(request.POST, instance=row)
+#       if form.is_valid():
+#         form.save()
+#         return redirect('../../')
+#     else:
+#       form = self.form_class(instance=row)
+#     return render(request,'update_medicine.html',{'form':form})
+
+#   def delete_object(self, request, key_id):
+#       row = get_object_or_404(self.model, pk=key_id)
+#       if request.method == 'POST':
+#           row.delete()
+#           return redirect('../../')
+#       return render(request, 'delete_medicine.html',{'object':row})
+
+# class MedicineView(BaseView):
+#     model = Medicine
+#     form_class = MedicineForm
+#     template_prefix = "medicine"
+
+
 class MedicineView:
   def show_medicine(request):
-    return render(request, 'show_medicine.html',{'object_list':Medicine.objects.all()})
-  def show_detail(request,key_id):
-    row = get_object_or_404(Medicine, pk=key_id)
-    form = MedicineForm(instance=row)
-    for field in form:
-      field.is_date = isinstance(field.field, DateField)
-    url_update = reverse("medicines:update-medicine", kwargs={'key_id': key_id})
-    url_delete = reverse("medicines:delete-medicine", kwargs={'key_id': key_id})
-    return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
+    # return render(request, 'show_medicine.html',{'object_list':Medicine.objects.all()})
+    medicines = Medicine.objects.all()
+    
+    # Danh sách để lưu các form đã được khởi tạo cho mỗi Category
+    form_list = []
+    
+    # Tạo form cho từng Category
+    for medicine in medicines:
+        form = MedicineForm(instance=medicine)
+        
+        # Xử lý các trường để kiểm tra kiểu dữ liệu, ví dụ như trường DateField
+        for field in form:
+            field.is_date = isinstance(field.field, DateField)
+        
+        # Tạo URL cho các nút update và delete
+        url_update = reverse("medicines:update-medicine", kwargs={'key_id': medicine.pk})
+        url_delete = reverse("medicines:delete-medicine", kwargs={'key_id': medicine.pk})
+        
+        # Thêm form và các URL vào trong danh sách
+        form_list.append({
+            'form': form,
+            'url_update': url_update,
+            'url_delete': url_delete
+        })
+    
+    # Trả về view với tất cả các form và nút update, delete
+    return render(request, 'show_medicine.html', {
+        'form_list': form_list
+    })
+  # def show_detail(request,key_id):
+  #   row = get_object_or_404(Medicine, pk=key_id)
+  #   form = MedicineForm(instance=row)
+  #   for field in form:
+  #     field.is_date = isinstance(field.field, DateField)
+  #   url_update = reverse("medicines:update-medicine", kwargs={'key_id': key_id})
+  #   url_delete = reverse("medicines:delete-medicine", kwargs={'key_id': key_id})
+  #   return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
   def add_medicine(request):
     if request.method == 'POST':
       form = MedicineForm(request.POST)
@@ -219,7 +308,7 @@ class MedicineView:
       form = MedicineForm(request.POST,instance=row)
       if form.is_valid():
         form.save()
-      return redirect('../')
+      return redirect('../../')
     else:
       row = get_object_or_404(Medicine, pk=key_id)
       form = MedicineForm(instance=row)
@@ -233,15 +322,42 @@ class MedicineView:
     return render(request, 'delete_medicine.html',{'object':row})
 class CategoryView:
   def show_medicine(request):
-    return render(request, 'show_medicine.html',{'object_list':Category.objects.all()})
-  def show_detail(request,key_id):
-    row = get_object_or_404(Category, pk=key_id)
-    form = CategoryForm(instance=row)
-    for field in form:
-      field.is_date = isinstance(field.field, DateField)
-    url_update = reverse("medicines:update-category", kwargs={'key_id': key_id})
-    url_delete = reverse("medicines:delete-category", kwargs={'key_id': key_id})
-    return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
+    categorys = Category.objects.all()
+    
+    # Danh sách để lưu các form đã được khởi tạo cho mỗi Category
+    form_list = []
+    
+    # Tạo form cho từng Category
+    for category in categorys:
+        form = CategoryForm(instance=category)
+        
+        # Xử lý các trường để kiểm tra kiểu dữ liệu, ví dụ như trường DateField
+        for field in form:
+            field.is_date = isinstance(field.field, DateField)
+        
+        # Tạo URL cho các nút update và delete
+        url_update = reverse("medicines:update-category", kwargs={'key_id': category.pk})
+        url_delete = reverse("medicines:delete-category", kwargs={'key_id': category.pk})
+        
+        # Thêm form và các URL vào trong danh sách
+        form_list.append({
+            'form': form,
+            'url_update': url_update,
+            'url_delete': url_delete
+        })
+    
+    # Trả về view với tất cả các form và nút update, delete
+    return render(request, 'show_medicine.html', {
+        'form_list': form_list
+    })
+  # def show_detail(request,key_id):
+  #   row = get_object_or_404(Category, pk=key_id)
+  #   form = CategoryForm(instance=row)
+  #   for field in form:
+  #     field.is_date = isinstance(field.field, DateField)
+  #   url_update = reverse("medicines:update-category", kwargs={'key_id': key_id})
+  #   url_delete = reverse("medicines:delete-category", kwargs={'key_id': key_id})
+  #   return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
   def add_medicine(request):
     if request.method == 'POST':
       form = CategoryForm(request.POST)
@@ -257,7 +373,7 @@ class CategoryView:
       form = CategoryForm(request.POST,instance=row)
       if form.is_valid():
         form.save()
-      return redirect('../')
+      return redirect('../../')
     else:
       row = get_object_or_404(Category, pk=key_id)
       form = CategoryForm(instance=row)
@@ -271,15 +387,42 @@ class CategoryView:
     return render(request, 'delete_medicine.html',{'object':row})
 class SupplierView:
   def show_medicine(request):
-    return render(request, 'show_medicine.html',{'object_list':Supplier.objects.all()})
-  def show_detail(request,key_id):
-    row = get_object_or_404(Supplier, pk=key_id)
-    form = SupplierForm(instance=row)
-    for field in form:
-      field.is_date = isinstance(field.field, DateField)
-    url_update = reverse("medicines:update-supplier", kwargs={'key_id': key_id})
-    url_delete = reverse("medicines:delete-supplier", kwargs={'key_id': key_id})
-    return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
+    suppliers = Supplier.objects.all()
+    
+    # Danh sách để lưu các form đã được khởi tạo cho mỗi Category
+    form_list = []
+    
+    # Tạo form cho từng Category
+    for supplier in suppliers:
+        form = SupplierForm(instance=supplier)
+        
+        # Xử lý các trường để kiểm tra kiểu dữ liệu, ví dụ như trường DateField
+        for field in form:
+            field.is_date = isinstance(field.field, DateField)
+        
+        # Tạo URL cho các nút update và delete
+        url_update = reverse("medicines:update-supplier", kwargs={'key_id': supplier.pk})
+        url_delete = reverse("medicines:delete-supplier", kwargs={'key_id': supplier.pk})
+        
+        # Thêm form và các URL vào trong danh sách
+        form_list.append({
+            'form': form,
+            'url_update': url_update,
+            'url_delete': url_delete
+        })
+    
+    # Trả về view với tất cả các form và nút update, delete
+    return render(request, 'show_medicine.html', {
+        'form_list': form_list
+    })
+  # def show_detail(request,key_id):
+  #   row = get_object_or_404(Supplier, pk=key_id)
+  #   form = SupplierForm(instance=row)
+  #   for field in form:
+  #     field.is_date = isinstance(field.field, DateField)
+  #   url_update = reverse("medicines:update-supplier", kwargs={'key_id': key_id})
+  #   url_delete = reverse("medicines:delete-supplier", kwargs={'key_id': key_id})
+  #   return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
   def add_medicine(request):
     if request.method == 'POST':
       form = SupplierForm(request.POST)
@@ -295,7 +438,7 @@ class SupplierView:
       form = SupplierForm(request.POST,instance=row)
       if form.is_valid():
         form.save()
-      return redirect('../')
+      return redirect('../../')
     else:
       row = get_object_or_404(Supplier, pk=key_id)
       form = SupplierForm(instance=row)
@@ -309,15 +452,42 @@ class SupplierView:
     return render(request, 'delete_medicine.html',{'object':row})
 class CustomerView:
   def show_medicine(request):
-    return render(request, 'show_medicine.html',{'object_list':Customer.objects.all()})
-  def show_detail(request,key_id):
-    row = get_object_or_404(Customer, pk=key_id)
-    form = CustomerForm(instance=row)
-    for field in form:
-      field.is_date = isinstance(field.field, DateField)
-    url_update = reverse("medicines:update-customer", kwargs={'key_id': key_id})
-    url_delete = reverse("medicines:delete-customer", kwargs={'key_id': key_id})
-    return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
+    customers = Customer.objects.all()
+    
+    # Danh sách để lưu các form đã được khởi tạo cho mỗi Category
+    form_list = []
+    
+    # Tạo form cho từng Category
+    for customer in customers:
+        form = CustomerForm(instance=customer)
+        
+        # Xử lý các trường để kiểm tra kiểu dữ liệu, ví dụ như trường DateField
+        for field in form:
+            field.is_date = isinstance(field.field, DateField)
+        
+        # Tạo URL cho các nút update và delete
+        url_update = reverse("medicines:update-customer", kwargs={'key_id': customer.pk})
+        url_delete = reverse("medicines:delete-customer", kwargs={'key_id': customer.pk})
+        
+        # Thêm form và các URL vào trong danh sách
+        form_list.append({
+            'form': form,
+            'url_update': url_update,
+            'url_delete': url_delete
+        })
+    
+    # Trả về view với tất cả các form và nút update, delete
+    return render(request, 'show_medicine.html', {
+        'form_list': form_list
+    })
+  # def show_detail(request,key_id):
+  #   row = get_object_or_404(Customer, pk=key_id)
+  #   form = CustomerForm(instance=row)
+  #   for field in form:
+  #     field.is_date = isinstance(field.field, DateField)
+  #   url_update = reverse("medicines:update-customer", kwargs={'key_id': key_id})
+  #   url_delete = reverse("medicines:delete-customer", kwargs={'key_id': key_id})
+  #   return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
   def add_medicine(request):
     if request.method == 'POST':
       form = CustomerForm(request.POST)
@@ -333,7 +503,7 @@ class CustomerView:
       form = CustomerForm(request.POST,instance=row)
       if form.is_valid():
         form.save()
-      return redirect('../')
+      return redirect('../../')
     else:
       row = get_object_or_404(Customer, pk=key_id)
       form = CustomerForm(instance=row)
@@ -347,15 +517,42 @@ class CustomerView:
     return render(request, 'delete_medicine.html',{'object':row})
 class EmployeeView:
   def show_medicine(request):
-    return render(request, 'show_medicine.html',{'object_list':Employee.objects.all()})
-  def show_detail(request,key_id):
-    row = get_object_or_404(Employee, pk=key_id)
-    form = EmployeeForm(instance=row)
-    for field in form:
-      field.is_date = isinstance(field.field, DateField)
-    url_update = reverse("medicines:update-employee", kwargs={'key_id': key_id})
-    url_delete = reverse("medicines:delete-employee", kwargs={'key_id': key_id})
-    return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
+    employees = Employee.objects.all()
+    
+    # Danh sách để lưu các form đã được khởi tạo cho mỗi Category
+    form_list = []
+    
+    # Tạo form cho từng Category
+    for employee in employees:
+        form = EmployeeForm(instance=employee)
+        
+        # Xử lý các trường để kiểm tra kiểu dữ liệu, ví dụ như trường DateField
+        for field in form:
+            field.is_date = isinstance(field.field, DateField)
+        
+        # Tạo URL cho các nút update và delete
+        url_update = reverse("medicines:update-employee", kwargs={'key_id': employee.pk})
+        url_delete = reverse("medicines:delete-employee", kwargs={'key_id': employee.pk})
+        
+        # Thêm form và các URL vào trong danh sách
+        form_list.append({
+            'form': form,
+            'url_update': url_update,
+            'url_delete': url_delete
+        })
+    
+    # Trả về view với tất cả các form và nút update, delete
+    return render(request, 'show_medicine.html', {
+        'form_list': form_list
+    })
+  # def show_detail(request,key_id):
+  #   row = get_object_or_404(Employee, pk=key_id)
+  #   form = EmployeeForm(instance=row)
+  #   for field in form:
+  #     field.is_date = isinstance(field.field, DateField)
+  #   url_update = reverse("medicines:update-employee", kwargs={'key_id': key_id})
+  #   url_delete = reverse("medicines:delete-employee", kwargs={'key_id': key_id})
+  #   return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
   def add_medicine(request):
     if request.method == 'POST':
       form = EmployeeForm(request.POST)
@@ -371,7 +568,7 @@ class EmployeeView:
       form = EmployeeForm(request.POST,instance=row)
       if form.is_valid():
         form.save()
-      return redirect('../')
+      return redirect('../../')
     else:
       row = get_object_or_404(Employee, pk=key_id)
       form = EmployeeForm(instance=row)
@@ -385,15 +582,42 @@ class EmployeeView:
     return render(request, 'delete_medicine.html',{'object':row})
 class SaleView:
   def show_medicine(request):
-    return render(request, 'show_medicine.html',{'object_list':Sale.objects.all()})
-  def show_detail(request,key_id):
-    row = get_object_or_404(Sale, pk=key_id)
-    form = SaleForm(instance=row)
-    for field in form:
-      field.is_date = isinstance(field.field, DateField)
-    url_update = reverse("medicines:update-sale", kwargs={'key_id': key_id})
-    url_delete = reverse("medicines:delete-sale", kwargs={'key_id': key_id})
-    return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
+    sales = Sale.objects.all()
+    
+    # Danh sách để lưu các form đã được khởi tạo cho mỗi Category
+    form_list = []
+    
+    # Tạo form cho từng Category
+    for sale in sales:
+        form = SaleForm(instance=sale)
+        
+        # Xử lý các trường để kiểm tra kiểu dữ liệu, ví dụ như trường DateField
+        for field in form:
+            field.is_date = isinstance(field.field, DateField)
+        
+        # Tạo URL cho các nút update và delete
+        url_update = reverse("medicines:update-sale", kwargs={'key_id': sale.pk})
+        url_delete = reverse("medicines:delete-sale", kwargs={'key_id': sale.pk})
+        
+        # Thêm form và các URL vào trong danh sách
+        form_list.append({
+            'form': form,
+            'url_update': url_update,
+            'url_delete': url_delete
+        })
+    
+    # Trả về view với tất cả các form và nút update, delete
+    return render(request, 'show_medicine.html', {
+        'form_list': form_list
+    })
+  # def show_detail(request,key_id):
+  #   row = get_object_or_404(Sale, pk=key_id)
+  #   form = SaleForm(instance=row)
+  #   for field in form:
+  #     field.is_date = isinstance(field.field, DateField)
+  #   url_update = reverse("medicines:update-sale", kwargs={'key_id': key_id})
+  #   url_delete = reverse("medicines:delete-sale", kwargs={'key_id': key_id})
+  #   return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
   def add_medicine(request):
     # if request.method == 'POST':
     #   form = SaleForm(request.POST)
@@ -455,7 +679,7 @@ class SaleView:
       form = SaleForm(request.POST,instance=row)
       if form.is_valid():
         form.save()
-      return redirect('../')
+      return redirect('../../')
     else:
       row = get_object_or_404(Sale, pk=key_id)
       form = SaleForm(instance=row)

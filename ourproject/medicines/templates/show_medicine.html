@@ -1,8 +1,48 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{% for instance in object_list %}
+<!-- {% for instance in object_list %}
      <p><a href="{{ instance.get_absolute_url }}">{{ instance.pk }}</a> - {{ instance.name }}</p>
-{% endfor %}
+{% endfor %} -->
+
+<table class="table table-bordered">
+     <thead>
+       <tr>
+         <!-- Lặp qua các trường trong form để lấy label làm tiêu đề -->
+         {% for field in form_list.0.form %}
+           <th>{{ field.label }}</th>
+         {% endfor %}
+         <th>Thao tác</th>
+       </tr>
+     </thead>
+     <tbody>
+       {% for item in form_list %}
+         <tr>
+   
+           <!-- Lặp qua tất cả các trường trong form và hiển thị chúng -->
+           {% for field in item.form %}
+             <td>
+               {% if field.is_date %}
+                    {{ field.value|date:"d/m/Y" }}
+               {% else %}
+                    {{ field.value }}
+               {% endif %}  <!-- Hiển thị trường với giá trị -->
+             </td>
+           {% endfor %}
+   
+           <td>
+             <!-- Nút Update và Delete -->
+             <button onclick="location.href='{{ item.url_update }}';">Cập nhật</button>
+             <button onclick="location.href='{{ item.url_delete }}';">Xóa</button>
+             
+             
+           </td>
+         </tr>
+       {% endfor %}
+     </tbody>
+   </table>
+   
+
+
 
 {% endblock %}
