@@ -33,3 +33,9 @@ body {
     padding: 20px;
     background-color: #f8f9fa; /* Màu nền nhạt */
 }
+.custom-table{
+    vertical-align: middle !important;
+    text-align: center !important;
+    border-radius: 5px !;
+    border:1px solid
+}

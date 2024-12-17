@@ -1,12 +1,17 @@
 {% extends 'base.html' %}
+{%load static%}
+{% block title %}Mecidine{% endblock %}
 
 {% block content %}
 <!-- {% for instance in object_list %}
      <p><a href="{{ instance.get_absolute_url }}">{{ instance.pk }}</a> - {{ instance.name }}</p>
 {% endfor %} -->
-
-<table class="table table-bordered">
-     <thead>
+<div class="d-flex align-items-center">
+  <a style="margin-right: 5px;" href="../">Back</a>
+  <h1>Medicine</h1>
+</div>
+<table class="table table-bordered custom-table">
+     <thead style="background-color:#6ecbd7" class="custom-table">
        <tr>
          <!-- Lặp qua các trường trong form để lấy label làm tiêu đề -->
          {% for field in form_list.0.form %}
