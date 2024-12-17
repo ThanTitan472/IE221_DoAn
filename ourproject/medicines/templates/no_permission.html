@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title%}
+No permisstion
+{% endblock %}
+
+
+
+{% block content%}
+  <div class="container">
+        <h1 style="color: red;">Thông báo</h1>
+        <p>{{ message }}</p>
+        <a href="{% url 'medicines:home' %}" class="btn btn-primary">Quay về trang chính</a>
+    </div>
+{%endblock%}

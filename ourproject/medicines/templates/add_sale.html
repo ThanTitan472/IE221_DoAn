@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form action='' method='POST'>{% csrf_token %}
+  {{ form.as_p }}
+
+    {% if step == 'calculate' %}
+      <!-- Hiển thị nút Save khi đã tính toán total_price -->
+      <button type="submit" name="save">Lưu</button>
+    {% else %}
+      <!-- Hiển thị nút Calculate khi đang ở bước đầu -->
+      <button type="submit" name="calculate">Xuất tổng tiền</button>
+    {% endif %}
+</form>
+
+{% if message %}
+  <p style="color: green;">{{ message }}</p>
+{% endif %}
+
+{% endblock %}

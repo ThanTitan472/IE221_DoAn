@@ -1,0 +1,27 @@
+{%extends 'base.html'%}
+{%load static%}
+{% block title%}
+Thông tin cá nhân
+{% endblock %}
+
+{%block content%}
+<h1>Thông tin cá nhân</h1>
+<table class="table table-bordered" border="1">
+    <tr>
+        <th>Tên đăng nhập</th>
+        <th>Email</th>
+        <th>Quyền Admin</th>
+        <th>Hành động</th>
+    </tr>
+    <tr>
+        <td>{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.is_superuser }}</td>
+        <td>
+        <button class="btn btn-primary">
+            <a style="color: #fff; text-decoration: none;" href="{% url 'medicines:edit_profile' %}">Chỉnh sửa thông tin</a>
+        </button>
+        </td>
+    </tr>
+</table>
+{%endblock%}

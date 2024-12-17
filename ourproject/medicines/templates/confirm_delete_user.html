@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title%}
+Xóa tài khoản
+{% endblock %}
+
+
+
+{% block content%}
+
+
+<h1>Xóa tài khoản</h1>
+<p>Bạn có chắc chắn muốn xóa tài khoản "{{ user.username }}" không?</p>
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Xóa</button>
+</form>
+<a href="{% url 'medicines:user_list' %}">Hủy bỏ</a>
+{%endblock%}

@@ -1,4 +1,4 @@
 EmployeeID,Name,Position,ContactNumber,HireDate,Salary,DateOfBirth
-EM001,Lê Văn Hải,Nhân viên bán hàng,0123456789,2022-01-05,8000,1995-02-15
-EM002,Phạm Thị Hoài,Quản lý,0987654321,2021-08-12,12000,1980-05-22
-EM003,Nguyễn Quốc Khánh,Nhân viên kho,0901234567,2023-05-20,7000,1988-11-30
+EM001,Lê Văn Hải,Nhân viên bán hàng,0123456789,05/01/2022,15000000,15/02/1995
+EM002,Phạm Thị Hoài,Quản lý,0987654321,12/08/2021,20000000,22/05/1980
+EM003,Nguyễn Quốc Khánh,Nhân viên kho,0901234567,20/05/2023,12000000,30/11/1988

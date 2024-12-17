@@ -1,17 +1,43 @@
 {% extends 'base.html' %}
+{% block title%}
+Chi tiết
+{% endblock %}
 
 {% block content %}
-<p>{{ object.medicine_id }}</p>
+<!-- <p>{{ object.medicine_id }}</p>
 <p>{{ object.name }}</p>
+<p>{{ object.category_id.category_id}}</p>
 <p>{{ object.dosage_form }}</p>
 <p>{{ object.strength }}</p>
 <p>{{ object.quantity_in_stock }}</p>
 <p>{{ object.price }}</p>
-<p>{{ object.expiry_date }}</p>
-<form method="POST" action="{% url 'update-medicine'}">
-  <button type="submit">Update</button>
-</form>
-<form method="POST" action="{% url 'delete-medicine'}">
-  <button type="submit">Delete</button>
-</form>
+<p>{{ object.expiry_date|date:"d/m/Y" }}</p>
+<p>{{ object.supplier_id.supplier_id}}</p> -->
+
+{% if form %}
+  <table border="1">
+    {% for field in form %}
+    <tr>
+      <td>{{ field.label }}</td>
+      <td>
+        {% if field.is_date %}
+            {{ field.value|date:"d/m/Y" }}
+        {% else %}
+            {{ field.value }}
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% else %}
+  <p>No data available for the selected model.</p>
+{% endif %}
+
+
+
+<button onclick="location.href='{{ url_update }}';">Cập nhật</button>
+<button onclick="location.href='{{ url_delete }}';">Xóa</button>
+
+
 {% endblock %}
+

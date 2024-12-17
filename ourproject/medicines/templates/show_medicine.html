@@ -1,8 +1,57 @@
 {% extends 'base.html' %}
+{% block title%}
+Mua hàng
+{% endblock %}
 
 {% block content %}
-{% for instance in object_list %}
-     <p>{{ instance.medicine_id }} - <a href="{{ instance.get_absolute_url }}">{{ instance.name }}</a></p>
-{% endfor %}
+<!-- {% for instance in object_list %}
+     <p><a href="{{ instance.get_absolute_url }}">{{ instance.pk }}</a> - {{ instance.name }}</p>
+{% endfor %} -->
+
+<table class="table table-bordered">
+     <thead style="
+     background-color: #aaa;
+ ">
+       <tr>
+         <!-- Lặp qua các trường trong form để lấy label làm tiêu đề -->
+         {% for field in form_list.0.form %}
+           <th>{{ field.label }}</th>
+         {% endfor %}
+         <th>Thao tác</th>
+       </tr>
+     </thead>
+     <tbody>
+       {% for item in form_list %}
+         <tr>
+   
+           <!-- Lặp qua tất cả các trường trong form và hiển thị chúng -->
+           {% for field in item.form %}
+             <td>
+               {% if field.is_date %}
+                    {{ field.value|date:"d/m/Y" }}
+               {% else %}
+                    {{ field.value }}
+               {% endif %}  <!-- Hiển thị trường với giá trị -->
+             </td>
+           {% endfor %}
+           {% if user.is_superuser %}
+           <td>
+             <!-- Nút Update và Delete -->
+               <button onclick="location.href='{{ item.url_update }}';">Cập nhật</button>
+               <button onclick="location.href='{{ item.url_delete }}';">Xóa</button>   
+           </td>
+           {% else %}
+           <td>
+               <form action="{{item.url_cart}}" method="POST">{% csrf_token %}
+                    <input type="number" placeholder="Số lượng" id="count" name="count">
+                    <button type="submit">Đặt hàng</button>
+               </form>
+            </td>
+            {% endif %}
+         </tr>
+       {% endfor %}
+     </tbody>
+   </table>
+   
 
 {% endblock %}

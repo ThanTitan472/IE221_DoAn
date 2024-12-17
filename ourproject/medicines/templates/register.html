@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title%}
+Đăng ký
+{% endblock %}
+
+
+
+{% block content%}
+<form method="POST" class="form-group">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-success">Đăng ký</button>
+  <p>Bạn đã có tài khoản? Đăng nhập <a href="{% url 'medicines:login' %}">tại đây</a></p>
+
+</form>
+{% endblock %}
