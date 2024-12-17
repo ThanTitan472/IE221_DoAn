@@ -12,7 +12,6 @@
          {% for field in form_list.0.form %}
            <th>{{ field.label }}</th>
          {% endfor %}
-         <th>Thao tác</th>
        </tr>
      </thead>
      <tbody>
@@ -29,20 +28,6 @@
                {% endif %}  <!-- Hiển thị trường với giá trị -->
              </td>
            {% endfor %}
-           {% if user.is_superuser %}
-           <td>
-             <!-- Nút Update và Delete -->
-               <button onclick="location.href='{{ item.url_update }}';">Cập nhật</button>
-               <button onclick="location.href='{{ item.url_delete }}';">Xóa</button>   
-           </td>
-           {% else %}
-           <td>
-               <form action="{{item.url_cart}}" method="POST">{% csrf_token %}
-                    <input type="number" placeholder="Số lượng" id="count" name="count">
-                    <button type="submit">Đặt hàng</button>
-               </form>
-            </td>
-            {% endif %}
          </tr>
        {% endfor %}
      </tbody>

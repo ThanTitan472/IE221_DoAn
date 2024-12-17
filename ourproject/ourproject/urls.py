@@ -24,10 +24,8 @@ urlpatterns = [
     # path('',include('register.urls')),
     # path('login/', LoginView.login_view,name='login'),
 
-    path('manage/',include('medicines.urls')),
-    path('admin/', admin.site.urls),
+    # path('manage/',include('medicines.urls')),
+    # path('admin/', admin.site.urls),
 
-    # path('admin/', include('medicines.admin_urls')),  # Giao diện admin
-    # path('user/', include('medicines.user_urls')),   # Giao diện người dùng đã đăng ký
-    # path('',include('medicines.login_urls'))
+    path('',include('medicines.urls')),
 ]

@@ -1,7 +1,7 @@
 from django import forms
 from .models import *
 
-
+from django.core.exceptions import ValidationError
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -181,23 +181,16 @@ class SaleForm(forms.ModelForm):
   # total = forms.IntegerField(disabled=True)
   class Meta:
     model = Sale
-    fields = ['sale_id', 'medicine_id', 'customer_id','quantity_sold', 'sale_date','total']
-    input_formats = {
-      'sale_date': ['%d/%m/%Y']
-    } 
+    fields = ['sale_id', 'customer_id', 'sale_date','total']
     widgets = {
       'sale_id':forms.TextInput(attrs={"placeholder": "Nhập mã hóa đơn"}),
-      'medicine_id': forms.TextInput(attrs={"placeholder": "Nhập mã thuốc"}),
       'customer_id': forms.TextInput( attrs={"placeholder": "Nhập mã khách hàng"}),
-      'quantity_sold': forms.NumberInput(attrs={"placeholder": "Nhập số lượng mua"}),
       'sale_date': forms.DateInput(format='%d/%m/%Y',attrs={'type': 'date','placeholder': 'Nhập ngày mua thuốc (DD/MM/YYYY)'}),
       'total': forms.NumberInput(attrs={'readonly': 'readonly'}),
     }
     labels = {
       'sale_id': 'Mã hóa đơn',
-      'medicine_id': 'Mã thuốc',
       'customer_id': 'Mã khách hàng',
-      'quantity_sold': 'Số lượng mua',
       'sale_date': 'Ngày mua thuốc',
       'total': 'Tổng tiền'
     }
@@ -214,3 +207,10 @@ class SaleForm(forms.ModelForm):
   #       cleaned_data['total'] = medicine.price * quantity
 
   #   return cleaned_data
+def max_value_dynamic(value, max_value):
+    if value > max_value:
+        raise ValidationError(f"Số lượng thuốc không đủ")
+class CartForm(forms.Form):
+    medicine_name = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    medicine_price = forms.IntegerField(widget=forms.NumberInput(attrs={'readonly': 'readonly'}))
+    count = forms.IntegerField(widget=forms.NumberInput(attrs={'value': '1'}))

@@ -9,13 +9,21 @@ from django.forms import DateField
 from django.urls import reverse
 from django.http import HttpResponse
 from django.contrib.auth.decorators import user_passes_test
+from .utils import user_required_permission
+from datetime import datetime
 
 # def is_admin(user):
 #     return user.is_superuser
 
 # def is_registered_user(user):
 #     return not user.is_superuser and not user.is_staff
-
+def home_view(request):
+  text = ''
+  if request.user.is_superuser:
+    text = 'Chào mừng admin'
+  else:
+    text = f'Chào mừng {request.user.username}'
+  return render(request,'home.html',{'text':text})
 # # Create your views here.
 # class HomeView:
 #   # @user_passes_test(is_admin)
@@ -123,7 +131,7 @@ class LoginView:
         user.is_superuser = False       # Không phải admin
         user.is_staff = False           # Không có quyền staff
         user.save()
-        return redirect("/manage/login")
+        return redirect("/login")
 
     else:
       form =  RegisterForm()
@@ -142,7 +150,7 @@ class LoginView:
         if user is not None:
           login(request, user)
           messages.success(request, "Đăng nhập thành công.")
-          return redirect('/manage/profile')  # Chuyển hướng sau khi đăng nhập thành công
+          return redirect('/profile')  # Chuyển hướng sau khi đăng nhập thành công
         else:
           messages.error(request, "Tài khoản hoặc mật khẩu không chính xác.")  # Thông báo khi đăng nhập thất bại
       else:
@@ -154,21 +162,22 @@ class LoginView:
 
   def logout_view(response):
     logout(response)
-    return redirect("/manage/login")
+    return redirect("/login")
 class UserView:
   def view_profile(request):
     return render(request, 'profile.html', {'user': request.user})
   def edit_profile(request):
     if request.method == 'POST':
-      form = ProfilePasswordChangeForm(request.POST, user=request.user)
+      form = ProfilePasswordChangeForm(data=request.POST, user=request.user)
       if form.is_valid():
           form.save()
           messages.success(request, "Thông tin của bạn đã được cập nhật thành công.")
-          return redirect('/manage/profile')
+          return redirect('/login')
     else:
       form = ProfilePasswordChangeForm(user=request.user)
 
     return render(request, 'edit_profile.html', {'form': form})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def user_list(request):
     users = User.objects.all()  # Lấy toàn bộ User từ database
     return render(request, 'user_list.html', {'users': users})
@@ -183,15 +192,16 @@ class UserView:
   #   else:
   #       form = PasswordChangeForm(user)
   #   return render(request, 'edit_user.html', {'form': form, 'user': user})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def delete_user(request, pk):
     user = get_object_or_404(User, pk=pk)
     if request.method == "POST":
         if user.is_superuser:
             messages.error(request, "Không thể xóa tài khoản admin.")
-            return redirect('/manage/users')
+            return redirect('/users')
         user.delete()
         messages.success(request, 'Tài khoản đã được xóa thành công.')
-        return redirect('/manage/users')
+        return redirect('/users')
     return render(request, 'confirm_delete_user.html', {'user': user})
   
 # class BaseView:
@@ -273,12 +283,13 @@ class MedicineView:
         # Tạo URL cho các nút update và delete
         url_update = reverse("medicines:update-medicine", kwargs={'key_id': medicine.pk})
         url_delete = reverse("medicines:delete-medicine", kwargs={'key_id': medicine.pk})
-        
+        url_cart = reverse("medicines:add-cart", kwargs={'key_id': medicine.pk})
         # Thêm form và các URL vào trong danh sách
         form_list.append({
             'form': form,
             'url_update': url_update,
-            'url_delete': url_delete
+            'url_delete': url_delete,
+            'url_cart': url_cart
         })
     
     # Trả về view với tất cả các form và nút update, delete
@@ -293,6 +304,7 @@ class MedicineView:
   #   url_update = reverse("medicines:update-medicine", kwargs={'key_id': key_id})
   #   url_delete = reverse("medicines:delete-medicine", kwargs={'key_id': key_id})
   #   return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
     if request.method == 'POST':
       form = MedicineForm(request.POST)
@@ -302,6 +314,7 @@ class MedicineView:
     else:
         form = MedicineForm()
     return render(request, 'add_medicine.html', {'form': form})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def update_medicine(request, key_id):
     if request.method == 'POST':
       row = get_object_or_404(Medicine, pk=key_id)
@@ -313,6 +326,7 @@ class MedicineView:
       row = get_object_or_404(Medicine, pk=key_id)
       form = MedicineForm(instance=row)
     return render(request,'update_medicine.html',{'form':form})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def delete_medicine(request,key_id):
     row = get_object_or_404(Medicine, pk=key_id)
     if request.method == 'POST':
@@ -321,6 +335,7 @@ class MedicineView:
       # return redirect('/medicine/')
     return render(request, 'delete_medicine.html',{'object':row})
 class CategoryView:
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def show_medicine(request):
     categorys = Category.objects.all()
     
@@ -358,6 +373,7 @@ class CategoryView:
   #   url_update = reverse("medicines:update-category", kwargs={'key_id': key_id})
   #   url_delete = reverse("medicines:delete-category", kwargs={'key_id': key_id})
   #   return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
     if request.method == 'POST':
       form = CategoryForm(request.POST)
@@ -367,6 +383,7 @@ class CategoryView:
     else:
         form = CategoryForm()
     return render(request, 'add_medicine.html', {'form': form})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def update_medicine(request, key_id):
     if request.method == 'POST':
       row = get_object_or_404(Category, pk=key_id)
@@ -378,6 +395,7 @@ class CategoryView:
       row = get_object_or_404(Category, pk=key_id)
       form = CategoryForm(instance=row)
     return render(request,'update_medicine.html',{'form':form})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def delete_medicine(request,key_id):
     row = get_object_or_404(Category, pk=key_id)
     if request.method == 'POST':
@@ -386,6 +404,7 @@ class CategoryView:
       # return redirect('/medicine/')
     return render(request, 'delete_medicine.html',{'object':row})
 class SupplierView:
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def show_medicine(request):
     suppliers = Supplier.objects.all()
     
@@ -423,6 +442,7 @@ class SupplierView:
   #   url_update = reverse("medicines:update-supplier", kwargs={'key_id': key_id})
   #   url_delete = reverse("medicines:delete-supplier", kwargs={'key_id': key_id})
   #   return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
     if request.method == 'POST':
       form = SupplierForm(request.POST)
@@ -432,6 +452,7 @@ class SupplierView:
     else:
         form = SupplierForm()
     return render(request, 'add_medicine.html', {'form': form})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def update_medicine(request, key_id):
     if request.method == 'POST':
       row = get_object_or_404(Supplier, pk=key_id)
@@ -443,6 +464,7 @@ class SupplierView:
       row = get_object_or_404(Supplier, pk=key_id)
       form = SupplierForm(instance=row)
     return render(request,'update_medicine.html',{'form':form})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def delete_medicine(request,key_id):
     row = get_object_or_404(Supplier, pk=key_id)
     if request.method == 'POST':
@@ -451,6 +473,7 @@ class SupplierView:
       # return redirect('/medicine/')
     return render(request, 'delete_medicine.html',{'object':row})
 class CustomerView:
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def show_medicine(request):
     customers = Customer.objects.all()
     
@@ -488,6 +511,7 @@ class CustomerView:
   #   url_update = reverse("medicines:update-customer", kwargs={'key_id': key_id})
   #   url_delete = reverse("medicines:delete-customer", kwargs={'key_id': key_id})
   #   return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
     if request.method == 'POST':
       form = CustomerForm(request.POST)
@@ -497,6 +521,7 @@ class CustomerView:
     else:
         form = CustomerForm()
     return render(request, 'add_medicine.html', {'form': form})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def update_medicine(request, key_id):
     if request.method == 'POST':
       row = get_object_or_404(Customer, pk=key_id)
@@ -508,6 +533,7 @@ class CustomerView:
       row = get_object_or_404(Customer, pk=key_id)
       form = CustomerForm(instance=row)
     return render(request,'update_medicine.html',{'form':form})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def delete_medicine(request,key_id):
     row = get_object_or_404(Customer, pk=key_id)
     if request.method == 'POST':
@@ -516,6 +542,7 @@ class CustomerView:
       # return redirect('/medicine/')
     return render(request, 'delete_medicine.html',{'object':row})
 class EmployeeView:
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def show_medicine(request):
     employees = Employee.objects.all()
     
@@ -553,6 +580,7 @@ class EmployeeView:
   #   url_update = reverse("medicines:update-employee", kwargs={'key_id': key_id})
   #   url_delete = reverse("medicines:delete-employee", kwargs={'key_id': key_id})
   #   return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
     if request.method == 'POST':
       form = EmployeeForm(request.POST)
@@ -562,6 +590,7 @@ class EmployeeView:
     else:
         form = EmployeeForm()
     return render(request, 'add_medicine.html', {'form': form})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def update_medicine(request, key_id):
     if request.method == 'POST':
       row = get_object_or_404(Employee, pk=key_id)
@@ -573,6 +602,7 @@ class EmployeeView:
       row = get_object_or_404(Employee, pk=key_id)
       form = EmployeeForm(instance=row)
     return render(request,'update_medicine.html',{'form':form})
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def delete_medicine(request,key_id):
     row = get_object_or_404(Employee, pk=key_id)
     if request.method == 'POST':
@@ -580,117 +610,323 @@ class EmployeeView:
       return redirect('../../')
       # return redirect('/medicine/')
     return render(request, 'delete_medicine.html',{'object':row})
-class SaleView:
+# class SaleView:
+#   def show_medicine(request):
+#     sales = Sale.objects.all()
+    
+#     # Danh sách để lưu các form đã được khởi tạo cho mỗi Category
+#     form_list = []
+    
+#     # Tạo form cho từng Category
+#     for sale in sales:
+#         form = SaleForm(instance=sale)
+        
+#         # Xử lý các trường để kiểm tra kiểu dữ liệu, ví dụ như trường DateField
+#         for field in form:
+#             field.is_date = isinstance(field.field, DateField)
+        
+#         # Tạo URL cho các nút update và delete
+#         url_update = reverse("medicines:update-sale", kwargs={'key_id': sale.pk})
+#         url_delete = reverse("medicines:delete-sale", kwargs={'key_id': sale.pk})
+        
+#         # Thêm form và các URL vào trong danh sách
+#         form_list.append({
+#             'form': form,
+#             'url_update': url_update,
+#             'url_delete': url_delete
+#         })
+    
+#     # Trả về view với tất cả các form và nút update, delete
+#     return render(request, 'show_medicine.html', {
+#         'form_list': form_list
+#     })
+#   # def show_detail(request,key_id):
+#   #   row = get_object_or_404(Sale, pk=key_id)
+#   #   form = SaleForm(instance=row)
+#   #   for field in form:
+#   #     field.is_date = isinstance(field.field, DateField)
+#   #   url_update = reverse("medicines:update-sale", kwargs={'key_id': key_id})
+#   #   url_delete = reverse("medicines:delete-sale", kwargs={'key_id': key_id})
+#   #   return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
+#   def add_medicine(request):
+#     # if request.method == 'POST':
+#     #   form = SaleForm(request.POST)
+#     #   if form.is_valid():
+#     #     form.save()
+#     #     form = SaleForm()
+#     # else:
+#     #   form = SaleForm()
+#     # return render(request, 'add_medicine.html', {'form': form})
+#     if request.method == 'POST':
+#       # Kiểm tra nếu đang ở bước "Calculate"
+#       if 'calculate' in request.POST:
+#         form = SaleForm(request.POST)
+#         if form.is_valid():
+#           # sale = form.cleaned_data['sale_id']
+#           medicine = form.cleaned_data['medicine_id']
+#           # customer = form.cleaned_data['customer_id']
+#           quantity = form.cleaned_data['quantity_sold']
+#           # date = form.cleaned_data['sale_date']
+          
+#           # Tính toán total_price
+#           total = medicine.price * quantity
+
+#           # Gắn giá trị total_price vào form (chưa lưu vào database)
+#           form.initial['total'] = total
+#           form.data = form.data.copy()  # Tạo bản sao POST data để sửa dữ liệu
+#           form.data['total'] = total
+
+#           return render(request, 'add_sale.html', {'form': form, 'step': 'calculate'})
+
+#       # Nếu đang ở bước "Save"
+#       elif 'save' in request.POST:
+#         form = SaleForm(request.POST)
+#         if form.is_valid():
+#           medicine = form.cleaned_data['medicine_id']
+#           quantity = form.cleaned_data['quantity_sold']
+#           try:
+#             medicine.reduce_stock(quantity)
+#           except ValueError as e:
+#             return render(request, 'add_sale.html', {
+#                 'form': form,
+#                 'step': 'initial',
+#                 'error': str(e)
+#             })
+#           form.save()  # Lưu vào cơ sở dữ liệu
+
+#           # Tạo form mới sau khi lưu
+#           form = SaleForm()
+#           return render(request, 'add_sale.html', {'form': form, 'step': 'initial', 'message': 'Saved successfully!'})
+
+#     else:
+#       # Hiển thị form ban đầu
+#       form = SaleForm()
+
+#     return render(request, 'add_sale.html', {'form': form, 'step': 'initial'})
+#   def update_medicine(request, key_id):
+#     if request.method == 'POST':
+#       row = get_object_or_404(Sale, pk=key_id)
+#       form = SaleForm(request.POST,instance=row)
+#       if form.is_valid():
+#         form.save()
+#       return redirect('../../')
+#     else:
+#       row = get_object_or_404(Sale, pk=key_id)
+#       form = SaleForm(instance=row)
+#     return render(request,'update_medicine.html',{'form':form})
+#   def delete_medicine(request,key_id):
+#     row = get_object_or_404(Sale, pk=key_id)
+#     if request.method == 'POST':
+#       row.delete()
+#       return redirect('../../')
+#       # return redirect('/medicine/')
+#     return render(request, 'delete_medicine.html',{'object':row})
+class CartView():
+  def add_medicine(request, key_id):
+    if request.method == 'POST':
+        customer_count = Customer.objects.count() + 1
+        customer_id = f'CU{customer_count:03d}'
+
+        sale_count = Sale.objects.count() + 1
+        sale_id = f'SL{sale_count:03d}'
+
+        customer_name = request.user.username
+        find = Customer.objects.filter(name=customer_name).first()  # Lấy khách hàng đầu tiên
+        
+        if not find:  # Nếu khách hàng chưa tồn tại
+            cus = Customer.objects.create(customer_id=customer_id, name=customer_name)
+            sale_in = Sale.objects.create(sale_id=sale_id, customer_id=cus)
+            medicine = Medicine.objects.get(medicine_id=key_id)  # Lấy đối tượng Medicine
+            Cart.objects.create(sale_id=sale_in, medicine_id=medicine, count=request.POST.get('count'))
+        else:
+            sale_in = Sale.objects.filter(customer_id=find.customer_id, status=False).first()
+            
+            if not sale_in:  # Nếu chưa có Sale nào chưa hoàn thành
+                sale_in = Sale.objects.create(sale_id=sale_id, customer_id=find)
+                medicine = Medicine.objects.get(medicine_id=key_id)  # Lấy đối tượng Medicine
+                Cart.objects.create(sale_id=sale_in, medicine_id=medicine, count=request.POST.get('count'))
+            else:
+                check_cart = Cart.objects.filter(medicine_id=key_id, sale_id=sale_in).first()
+                if not check_cart:  # Nếu không có Cart cho medicine_id này
+                    medicine = Medicine.objects.get(medicine_id=key_id)  # Lấy đối tượng Medicine
+                    Cart.objects.create(sale_id=sale_in, medicine_id=medicine, count=request.POST.get('count'))
+                else:
+                    # Cập nhật số lượng mới
+                    count_new = check_cart.count + int(request.POST.get('count'))
+                    check_cart.count = count_new
+                    check_cart.save()
+
+        # Sau khi thực hiện thao tác, trả về redirect đến trang /medicine
+    return redirect('/medicine')
+    # if request.method == 'POST':
+    #   customer_count = Customer.objects.count() +1
+    #   customer_id = f'CU{customer_count:03d}'
+      
+    #   sale_count = Sale.objects.count() +1
+    #   sale_id = f'SL{sale_count:03d}'
+      
+    #   customer_name = request.user.username
+    #   find = Customer.objects.filter(name=customer_name)
+    #   if find.exists() == False:
+    #     cus = Customer.objects.create(customer_id=customer_id,name=customer_name)
+    #     Sale.objects.create(sale_id=sale_id,customer_id=cus)
+    #     Cart.objects.create(sale_id=sale_id,medicine_id=key_id,count=request.POST.get('count'))
+    #   else:
+    #     sale_in = Sale.objects.filter(customer_id=customer_id,status=True)
+    #     if sale_in.exists() == False:
+    #       Sale.objects.create(sale_id=sale_id,customer_id=find.customer_id)
+    #       Cart.objects.create(sale_id=sale_id,medicine_id=key_id,count=request.POST.get('count'))
+    #     else:
+    #       check_cart = Cart.objects.filter(medicine_id=key_id)
+    #       if check_cart.exists() == False:
+    #         Cart.objects.create(sale_id=sale_in.sale_id,medicine_id=key_id,count=request.POST.get('count'))
+    #       else:
+    #         count_new = check_cart.count + request.POST.get('count')
+    #         check_cart.count = count_new
+    #         check_cart.save()
+    # return redirect('/medicine')
   def show_medicine(request):
-    sales = Sale.objects.all()
-    
-    # Danh sách để lưu các form đã được khởi tạo cho mỗi Category
+    carts = Cart.objects.all()
     form_list = []
-    
-    # Tạo form cho từng Category
-    for sale in sales:
-        form = SaleForm(instance=sale)
-        
-        # Xử lý các trường để kiểm tra kiểu dữ liệu, ví dụ như trường DateField
-        for field in form:
-            field.is_date = isinstance(field.field, DateField)
-        
-        # Tạo URL cho các nút update và delete
-        url_update = reverse("medicines:update-sale", kwargs={'key_id': sale.pk})
-        url_delete = reverse("medicines:delete-sale", kwargs={'key_id': sale.pk})
-        
-        # Thêm form và các URL vào trong danh sách
+    sum_o = 0
+    for cart in carts:
+        sum_o += cart.medicine_id.price * cart.count
+        form = CartForm(initial={
+            'medicine_name': cart.medicine_id.name,
+            'medicine_price': cart.medicine_id.price,
+            'count': cart.count
+        })
+        url_update = reverse("medicines:update-cart", kwargs={'id':cart.id})
+        url_delete = reverse("medicines:delete-cart", kwargs={'id': cart.id})
         form_list.append({
             'form': form,
             'url_update': url_update,
             'url_delete': url_delete
         })
-    
-    # Trả về view với tất cả các form và nút update, delete
-    return render(request, 'show_medicine.html', {
-        'form_list': form_list
+    if not form_list:
+        messages.error(request, "Giỏ hàng của bạn hiện tại trống!")
+    return render(request, 'show_cart.html', {
+        'form_list': form_list,
+        'sum_o': sum_o
     })
-  # def show_detail(request,key_id):
-  #   row = get_object_or_404(Sale, pk=key_id)
-  #   form = SaleForm(instance=row)
-  #   for field in form:
-  #     field.is_date = isinstance(field.field, DateField)
-  #   url_update = reverse("medicines:update-sale", kwargs={'key_id': key_id})
-  #   url_delete = reverse("medicines:delete-sale", kwargs={'key_id': key_id})
-  #   return render(request,'show_detail.html',{'form':form,'url_update': url_update,'url_delete':url_delete})
-  def add_medicine(request):
+    # carts = Cart.objects.all()
+    # form_list = []
+    # sum_o = 0
+
     # if request.method == 'POST':
-    #   form = SaleForm(request.POST)
+    #     # Duyệt qua các form đã gửi để cập nhật dữ liệu
+    #     for item in form_list:
+    #         form = item['form']
+    #         if form.is_valid():
+    #             # Lấy giá trị mới từ trường count và cập nhật
+    #             new_count = form.cleaned_data['count']
+    #             cart_instance = Cart.objects.get(id=item['form'].id)  # Lấy Cart theo id
+    #             cart_instance.count = new_count
+    #             cart_instance.save()
+
+    # # Tạo form cho từng Cart
+    # for cart in carts:
+    #     sum_o += cart.medicine_id.price * cart.count
+    #     form = CartForm(initial={
+    #         'medicine_name': cart.medicine_id.name,
+    #         'medicine_price': cart.medicine_id.price,
+    #         'count': cart.count
+    #     })
+    #     form.id = cart.id  # Thêm id vào form để nhận diện khi update
+    #     url_update = reverse("medicines:update-cart", kwargs={'id': cart.id})
+    #     url_delete = reverse("medicines:delete-cart", kwargs={'id': cart.id})
+    #     form_list.append({
+    #         'form': form,
+    #         'url_update': url_update,
+    #         'url_delete': url_delete
+    #     })
+
+    # return render(request, 'show_cart.html', {
+    #     'form_list': form_list,
+    #     'sum_o': sum_o
+    # })
+  def update_medicine(request, id):
+    # if request.method == 'POST':
+    #   row = get_object_or_404(Cart,pk=id)
+    #   form = CartForm(initial={
+    #         'medicine_name': row.medicine_id.name,
+    #         'medicine_price': row.medicine_id.price,
+    #         'count': row.count
+    #     })
     #   if form.is_valid():
-    #     form.save()
-    #     form = SaleForm()
-    # else:
-    #   form = SaleForm()
-    # return render(request, 'add_medicine.html', {'form': form})
+    #     reg = Cart(sale_id=row.sale_id,medicine_id=row.medicine_id,count=form.cleaned_data['count'])
+    #     reg.save()
+    # return redirect('/cart')
+    row = get_object_or_404(Cart, pk=id)  # Lấy Cart hiện tại
     if request.method == 'POST':
-      # Kiểm tra nếu đang ở bước "Calculate"
-      if 'calculate' in request.POST:
-        form = SaleForm(request.POST)
-        if form.is_valid():
-          # sale = form.cleaned_data['sale_id']
-          medicine = form.cleaned_data['medicine_id']
-          # customer = form.cleaned_data['customer_id']
-          quantity = form.cleaned_data['quantity_sold']
-          # date = form.cleaned_data['sale_date']
-          
-          # Tính toán total_price
-          total = medicine.price * quantity
-
-          # Gắn giá trị total_price vào form (chưa lưu vào database)
-          form.initial['total'] = total
-          form.data = form.data.copy()  # Tạo bản sao POST data để sửa dữ liệu
-          form.data['total'] = total
-
-          return render(request, 'add_sale.html', {'form': form, 'step': 'calculate'})
-
-      # Nếu đang ở bước "Save"
-      elif 'save' in request.POST:
-        form = SaleForm(request.POST)
-        if form.is_valid():
-          medicine = form.cleaned_data['medicine_id']
-          quantity = form.cleaned_data['quantity_sold']
-          try:
-            medicine.reduce_stock(quantity)
-          except ValueError as e:
-            return render(request, 'add_sale.html', {
-                'form': form,
-                'step': 'initial',
-                'error': str(e)
-            })
-          form.save()  # Lưu vào cơ sở dữ liệu
-
-          # Tạo form mới sau khi lưu
-          form = SaleForm()
-          return render(request, 'add_sale.html', {'form': form, 'step': 'initial', 'message': 'Saved successfully!'})
-
+        form = CartForm(request.POST)  # Khởi tạo form với dữ liệu POST
+        if form.is_valid():  # Kiểm tra form có hợp lệ không
+            row.count = form.cleaned_data['count']  # Cập nhật số lượng
+            row.save()  # Lưu lại đối tượng đã được cập nhật
+            return redirect('/cart')  # Điều hướng lại trang cart sau khi cập nhật thành công
     else:
-      # Hiển thị form ban đầu
-      form = SaleForm()
-
-    return render(request, 'add_sale.html', {'form': form, 'step': 'initial'})
-  def update_medicine(request, key_id):
-    if request.method == 'POST':
-      row = get_object_or_404(Sale, pk=key_id)
-      form = SaleForm(request.POST,instance=row)
-      if form.is_valid():
-        form.save()
-      return redirect('../../')
-    else:
-      row = get_object_or_404(Sale, pk=key_id)
-      form = SaleForm(instance=row)
-    return render(request,'update_medicine.html',{'form':form})
-  def delete_medicine(request,key_id):
-    row = get_object_or_404(Sale, pk=key_id)
+        form = CartForm(initial={
+            'medicine_name': row.medicine_id.name,
+            'medicine_price': row.medicine_id.price,
+            'count': row.count
+        })
+  def delete_medicine(request, id):
+    row = get_object_or_404(Cart, pk=id)
     if request.method == 'POST':
       row.delete()
-      return redirect('../../')
-      # return redirect('/medicine/')
-    return render(request, 'delete_medicine.html',{'object':row})
+      return redirect('/cart')
+  def pay_medicine(request):
+    if request.method == 'POST':
+      carts = Cart.objects.all()
+      for cart in carts:
+        medicine = cart.medicine_id
+        quantity = cart.count
+        try:
+          medicine.check_stock(quantity)
+        except ValueError as e:
+          messages.error(request, str(e))
+      for cart in carts:
+        Order.objects.create(
+          sale_id = cart.sale_id,
+          medicine_id = cart.medicine_id,
+          count = cart.count,
+        )
+        medicine = cart.medicine_id
+        quantity = cart.count
+        medicine.reduce_stock(quantity)
+        sale = cart.sale_id
+        sale.total = request.POST.get('sum_o')
+        sale.status =True 
+        sale.sale_date = datetime.now().strftime('%Y-%m-%d')
+        sale.save()
+      Cart.objects.all().delete()
+    return redirect('/cart')
+class OrderView():
+  def show_medicine(request):
+    orders = Order.objects.all()
+    form_list = []
+    for order in orders:
+        form = CartForm(initial={
+            'medicine_name': order.medicine_id.name,
+            'medicine_price': order.medicine_id.price,
+            'count': order.count
+        })
+        form_list.append({
+            'form': form
+        })
+    return render(request, 'show_order.html', {'form_list': form_list})
+class SaleView:
+  @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
+  def show_medicine(request):
+    sales = Sale.objects.all()
+    form_list = []
+    for sale in sales:
+        form = SaleForm(instance=sale)
+        form_list.append({
+            'form': form
+        })
+    return render(request, 'show_order.html', {'form_list': form_list})
+
 #/////////////////////////
 
 

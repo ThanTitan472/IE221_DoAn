@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if messages %}
+        <div class="alert alert-danger">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+<div class="form-container">
+    {% for item in form_list %}
+        <form action="{{ item.url_update }}" method="POST">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="medicine_name">{{ item.form.medicine_name.label }}</label>
+                    {{ item.form.medicine_name }}
+                </div>
+                <div class="form-group">
+                    <label for="medicine_price">{{ item.form.medicine_price.label }}</label>
+                    {{ item.form.medicine_price }}
+                </div>
+                <div class="form-group">
+                    <label for="count">{{ item.form.count.label }}</label>
+                    {{ item.form.count }}
+                </div>
+                <div class="form-group">
+                    <button type="submit">Cập nhật</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Form xóa Cart, không lồng vào form cập nhật -->
+        <form action="{{ item.url_delete }}" method="POST">
+            {% csrf_token %}
+            <button type="submit">Xóa</button>
+        </form>
+    {% endfor %}
+</div>
+
+<p>Tổng tiền {{ sum_o }}</p>
+<!-- Nút Thanh toán với form POST -->
+<form action="{% url 'medicines:pay-cart' %}" method="POST">
+  {% csrf_token %}
+  <input type="hidden" name="sum_o" value="{{ sum_o }}">
+  <button type="submit">Thanh toán</button>
+</form>
+
+{% endblock %}

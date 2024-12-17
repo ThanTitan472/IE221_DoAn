@@ -10,7 +10,8 @@ from .views import *
 app_name = 'medicines'
 
 urlpatterns = [
-  # path(''),
+  path('',home_view,name='home'),
+  path('home/',home_view,name='home'),
 
   path('profile/', UserView.view_profile, name='view_profile'),  # Xem thông tin cá nhân
   path('profile/edit/', UserView.edit_profile, name='edit_profile'),
@@ -60,8 +61,17 @@ urlpatterns = [
   path('employee/<str:key_id>/delete/', EmployeeView.delete_medicine, name='delete-employee'),
 
   path('sale/', SaleView.show_medicine, name='show-sale'),
-  path('sale/add/', SaleView.add_medicine, name='add-sale'),
-  # path('sale/<str:key_id>/', SaleView.show_detail, name='show-detail-sale'),
-  path('sale/<str:key_id>/update/', SaleView.update_medicine, name='update-sale'),
-  path('sale/<str:key_id>/delete/', SaleView.delete_medicine, name='delete-sale'),
+  # path('sale/add/', SaleView.add_medicine, name='add-sale'),
+  # # path('sale/<str:key_id>/', SaleView.show_detail, name='show-detail-sale'),
+  # path('sale/<str:key_id>/update/', SaleView.update_medicine, name='update-sale'),
+  # path('sale/<str:key_id>/delete/', SaleView.delete_medicine, name='delete-sale'),
+
+
+  path('cart/',CartView.show_medicine,name='show-cart'),
+  path('cart/<str:key_id>/add',CartView.add_medicine,name='add-cart'),
+  path('cart/<int:id>/update',CartView.update_medicine,name='update-cart'),
+  path('cart/<int:id>/delete',CartView.delete_medicine,name='delete-cart'),
+  path('cart/pay_medicine',CartView.pay_medicine, name='pay-cart'),
+
+  path('order/',OrderView.show_medicine,name='show-order'),
 ]

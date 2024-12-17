@@ -34,9 +34,10 @@ class Medicine(models.Model):
   expiry_date = models.DateField()
   supplier_id = models.ForeignKey(Supplier, on_delete=models.CASCADE, to_field='supplier_id')
 
-  def reduce_stock(self, quantity):
+  def check_stock(self, quantity):
     if self.quantity_in_stock < quantity:
         raise ValueError("Không đủ thuốc có sẵn")
+  def reduce_stock(self, quantity):
     self.quantity_in_stock -= quantity
     self.save()
 
@@ -50,9 +51,9 @@ class Medicine(models.Model):
 class Customer(models.Model):
   customer_id = models.CharField(max_length=5,unique= True, primary_key=True)
   name = models.CharField(max_length=50)
-  contact_number = models.CharField(max_length=10)
-  address = models.CharField(max_length=30)
-  date_of_birth = models.DateField()
+  contact_number = models.CharField(max_length=10,blank=True, null=True)
+  address = models.CharField(max_length=30,blank=True, null=True)
+  date_of_birth = models.DateField(blank=True, null=True)
   
   def get_absolute_url(self):
     return reverse("medicines:show-detail-customer", kwargs={'key_id': self.pk})
@@ -70,10 +71,11 @@ class Employee(models.Model):
 # SaleID,MedicineID,CustomerID,QuantitySold,SaleDate,TotalPrice
 class Sale(models.Model):
   sale_id = models.CharField(max_length=5,unique=True, primary_key=True)
-  medicine_id = models.ForeignKey(Medicine, on_delete=models.CASCADE,to_field='medicine_id')
+  # medicine_id = models.ForeignKey(Medicine, on_delete=models.CASCADE,to_field='medicine_id')
   customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE, to_field='customer_id')
-  quantity_sold = models.IntegerField()
-  sale_date = models.DateField()
+  # quantity_sold = models.IntegerField()
+  sale_date = models.DateField(blank=True, null=True)
+  status = models.BooleanField(default=False)
   # total = models.IntegerField(editable=False)
   total = models.IntegerField(blank=True, null=True)
 
@@ -83,3 +85,12 @@ class Sale(models.Model):
 
   def get_absolute_url(self):
     return reverse("medicines:show-detail-sale", kwargs={'key_id': self.pk})
+class Order(models.Model):
+  sale_id = models.ForeignKey(Sale, on_delete=models.CASCADE, to_field='sale_id')
+  medicine_id = models.ForeignKey(Medicine, on_delete=models.CASCADE, to_field='medicine_id')
+  count = models.IntegerField()
+class Cart(models.Model):
+  sale_id = models.ForeignKey(Sale, on_delete=models.CASCADE, to_field='sale_id')
+  medicine_id = models.ForeignKey(Medicine, on_delete=models.CASCADE, to_field='medicine_id')
+  count = models.IntegerField()
+    
