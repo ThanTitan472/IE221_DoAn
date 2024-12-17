@@ -34,19 +34,6 @@ class RegisterForm(UserCreationForm):
             self.fields[field_name].label = self.Meta.labels.get(field_name, "")
             self.fields[field_name].help_text = self.Meta.help_texts.get(field_name, "")            
 
-# class LoginForm(AuthenticationForm):
-  # class Meta:
-  #   model = User
-  #   fields = ['username', 'password']
-  #   labels = {
-  #     "username": "Tên đăng nhập",
-  #     "password": "Mật khẩu",
-  #   }
-  # def __init__(self, *args, **kwargs):
-  #   super().__init__(*args, **kwargs)
-  #   for field_name in ['username', 'password']:
-  #       self.fields[field_name].label = self.Meta.labels.get(field_name, "")
-  #   self.fields['password'].widget = forms.PasswordInput()
 class LoginForm(forms.Form):
   username = forms.CharField(max_length=150, required=True, label="Tên đăng nhập")
   password = forms.CharField(widget=forms.PasswordInput, required=True, label="Mật khẩu")
@@ -101,7 +88,6 @@ class CategoryForm(forms.ModelForm):
   class Meta:
     model = Category
     fields = ['category_id','name','description']
-    # input_formats = 
     widgets = {
       'category_id':forms.TextInput(attrs={"placeholder": "Nhập mã phân loại thuốc"}),
       'name': forms.TextInput(attrs={"placeholder": "Nhập tên phân loại thuốc"}),
@@ -178,7 +164,6 @@ class EmployeeForm(forms.ModelForm):
     }
 
 class SaleForm(forms.ModelForm):
-  # total = forms.IntegerField(disabled=True)
   class Meta:
     model = Sale
     fields = ['sale_id', 'customer_id', 'sale_date','total']
@@ -197,16 +182,6 @@ class SaleForm(forms.ModelForm):
   def __init__(self, *args, **kwargs):
       super().__init__(*args, **kwargs)
       self.fields['total'].required = False
-  # def clean(self):
-  #   cleaned_data = super().clean()
-  #   medicine = cleaned_data.get('medicine_id')  # Lấy đối tượng Medicine
-  #   quantity = cleaned_data.get('quantity_sold')  # Lấy số lượng
-
-  #   if medicine and quantity:
-  #       # Tính toán total_price
-  #       cleaned_data['total'] = medicine.price * quantity
-
-  #   return cleaned_data
 def max_value_dynamic(value, max_value):
     if value > max_value:
         raise ValidationError(f"Số lượng thuốc không đủ")

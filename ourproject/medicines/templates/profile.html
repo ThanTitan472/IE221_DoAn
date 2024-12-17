@@ -1,5 +1,12 @@
-<h1>Danh sách người dùng</h1>
-<table border="1">
+{%extends 'base.html'%}
+{%load static%}
+{% block title%}
+Thông tin cá nhân
+{% endblock %}
+
+{%block content%}
+<h1>Thông tin cá nhân</h1>
+<table class="table table-bordered" border="1">
     <tr>
         <th>Tên đăng nhập</th>
         <th>Email</th>
@@ -11,8 +18,10 @@
         <td>{{ user.email }}</td>
         <td>{{ user.is_superuser }}</td>
         <td>
-          <a href="{% url 'medicines:edit_profile' %}">Chỉnh sửa thông tin</a>
+        <button class="btn btn-primary">
+            <a style="color: #fff; text-decoration: none;" href="{% url 'medicines:edit_profile' %}">Chỉnh sửa thông tin</a>
+        </button>
         </td>
     </tr>
 </table>
-<a href="{% url 'medicines:logout' %}">Đăng xuất</a>
+{%endblock%}

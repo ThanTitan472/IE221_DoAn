@@ -1,15 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Không có quyền</title>
-</head>
-<body>
-    <div class="container">
+{% extends "base.html" %}
+
+{% block title%}
+No permisstion
+{% endblock %}
+
+
+
+{% block content%}
+  <div class="container">
         <h1 style="color: red;">Thông báo</h1>
         <p>{{ message }}</p>
         <a href="{% url 'medicines:home' %}" class="btn btn-primary">Quay về trang chính</a>
     </div>
-</body>
-</html>
+{%endblock%}

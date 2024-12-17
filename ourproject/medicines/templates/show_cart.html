@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+{% block title%}
+Giỏ hàng
+{% endblock %}
 
 {% block content %}
 {% if messages %}
@@ -26,9 +29,6 @@
                     <label for="count">{{ item.form.count.label }}</label>
                     {{ item.form.count }}
                 </div>
-                <div class="form-group">
-                    <button type="submit">Cập nhật</button>
-                </div>
             </div>
         </form>
 
@@ -45,7 +45,7 @@
 <form action="{% url 'medicines:pay-cart' %}" method="POST">
   {% csrf_token %}
   <input type="hidden" name="sum_o" value="{{ sum_o }}">
-  <button type="submit">Thanh toán</button>
+  <button class="btn btn-primary" type="submit">Thanh toán</button>
 </form>
 
 {% endblock %}

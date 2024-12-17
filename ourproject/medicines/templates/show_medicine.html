@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+{% block title%}
+Mua hàng
+{% endblock %}
 
 {% block content %}
 <!-- {% for instance in object_list %}
@@ -6,7 +9,9 @@
 {% endfor %} -->
 
 <table class="table table-bordered">
-     <thead>
+     <thead style="
+     background-color: #aaa;
+ ">
        <tr>
          <!-- Lặp qua các trường trong form để lấy label làm tiêu đề -->
          {% for field in form_list.0.form %}
@@ -48,7 +53,5 @@
      </tbody>
    </table>
    
-
-
 
 {% endblock %}
