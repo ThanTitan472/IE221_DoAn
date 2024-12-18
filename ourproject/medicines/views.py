@@ -68,6 +68,8 @@ class LoginView:
     return redirect("/login")
 class UserView:
   def view_profile(request):
+    if not request.user or not request.user.is_authenticated:
+        return redirect("/login")
     return render(request, 'profile.html', {'user': request.user})
   def edit_profile(request):
     if request.method == 'POST':
@@ -99,6 +101,8 @@ class UserView:
 
 class MedicineView:
   def show_medicine(request):
+    if not request.user or not request.user.is_authenticated:
+        return redirect("/login")
     medicines = Medicine.objects.all()
     
     form_list = []
@@ -409,6 +413,8 @@ class CartView():
 
     return redirect('/medicine')
   def show_medicine(request):
+    if not request.user or not request.user.is_authenticated:
+        return redirect("/login")
     try:
         customer = Customer.objects.get(name=request.user.username)
     except Customer.DoesNotExist:
@@ -492,6 +498,8 @@ class CartView():
 class OrderView():
   def show_medicine(request):
     # orders = Order.objects.all()
+    if not request.user or not request.user.is_authenticated:
+        return redirect("/login")
     try:
         customer = Customer.objects.get(name=request.user.username)
     except Customer.DoesNotExist:
