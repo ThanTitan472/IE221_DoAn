@@ -120,7 +120,8 @@ class MedicineView:
         })
     
     return render(request, 'show_medicine.html', {
-        'form_list': form_list
+        'form_list': form_list,
+        'url_add': reverse("medicines:add-medicine")
     })
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
@@ -166,14 +167,14 @@ class CategoryView:
         
         url_update = reverse("medicines:update-category", kwargs={'key_id': category.pk})
         url_delete = reverse("medicines:delete-category", kwargs={'key_id': category.pk})
-        
         form_list.append({
             'form': form,
             'url_update': url_update,
-            'url_delete': url_delete
+            'url_delete': url_delete,
         })
         return render(request, 'show_medicine.html', {
-        'form_list': form_list
+        'form_list': form_list,
+        'url_add': reverse("medicines:add-category")
     })
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
@@ -219,15 +220,15 @@ class SupplierView:
         
         url_update = reverse("medicines:update-supplier", kwargs={'key_id': supplier.pk})
         url_delete = reverse("medicines:delete-supplier", kwargs={'key_id': supplier.pk})
-        
         form_list.append({
             'form': form,
             'url_update': url_update,
-            'url_delete': url_delete
+            'url_delete': url_delete,
         })
     
     return render(request, 'show_medicine.html', {
-        'form_list': form_list
+        'form_list': form_list,
+        'url_add': reverse("medicines:add-supplier")
     })
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
@@ -274,15 +275,15 @@ class CustomerView:
         
         url_update = reverse("medicines:update-customer", kwargs={'key_id': customer.pk})
         url_delete = reverse("medicines:delete-customer", kwargs={'key_id': customer.pk})
-        
         form_list.append({
             'form': form,
             'url_update': url_update,
-            'url_delete': url_delete
+            'url_delete': url_delete,
         })
     
     return render(request, 'show_medicine.html', {
-        'form_list': form_list
+        'form_list': form_list,
+        'url_add': reverse("medicines:add-customer")
     })
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
@@ -331,16 +332,16 @@ class EmployeeView:
         # Tạo URL cho các nút update và delete
         url_update = reverse("medicines:update-employee", kwargs={'key_id': employee.pk})
         url_delete = reverse("medicines:delete-employee", kwargs={'key_id': employee.pk})
-        
         # Thêm form và các URL vào trong danh sách
         form_list.append({
             'form': form,
             'url_update': url_update,
-            'url_delete': url_delete
+            'url_delete': url_delete,
         })
     
     return render(request, 'show_medicine.html', {
-        'form_list': form_list
+        'form_list': form_list,
+        'url_add': reverse("medicines:add-employee")
     })
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
@@ -408,7 +409,19 @@ class CartView():
 
     return redirect('/medicine')
   def show_medicine(request):
-    carts = Cart.objects.all()
+    try:
+        customer = Customer.objects.get(name=request.user.username)
+    except Customer.DoesNotExist:
+        messages.error(request, "Không tìm thấy khách hàng tương ứng với tài khoản của bạn!")
+        return render(request, 'show_cart.html', {
+            'form_list': [],
+            'sum_o': 0
+        })
+    # carts = Cart.objects.all()
+    sales = Sale.objects.filter(customer_id=customer)
+
+    # Lấy tất cả các Cart liên quan đến Sale của khách hàng
+    carts = Cart.objects.filter(sale_id__in=sales)
     form_list = []
     sum_o = 0
     for cart in carts:

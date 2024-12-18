@@ -186,6 +186,15 @@ def max_value_dynamic(value, max_value):
     if value > max_value:
         raise ValidationError(f"Số lượng thuốc không đủ")
 class CartForm(forms.Form):
-    medicine_name = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
-    medicine_price = forms.IntegerField(widget=forms.NumberInput(attrs={'readonly': 'readonly'}))
-    count = forms.IntegerField(widget=forms.NumberInput(attrs={'value': '1'}))
+    medicine_name = forms.CharField(
+        label="Tên thuốc", 
+        widget=forms.TextInput(attrs={'readonly': 'readonly'})
+    )
+    medicine_price = forms.IntegerField(
+        label="Giá thuốc", 
+        widget=forms.NumberInput(attrs={'readonly': 'readonly'})
+    )
+    count = forms.IntegerField(
+        label="Số lượng", 
+        widget=forms.NumberInput(attrs={'value': '1'})
+    )
