@@ -491,7 +491,19 @@ class CartView():
     return redirect('/cart')
 class OrderView():
   def show_medicine(request):
-    orders = Order.objects.all()
+    # orders = Order.objects.all()
+    try:
+        customer = Customer.objects.get(name=request.user.username)
+    except Customer.DoesNotExist:
+        messages.error(request, "Không tìm thấy khách hàng tương ứng với tài khoản của bạn!")
+        return render(request, 'show_order.html', {
+            'form_list': [],
+        })
+    # carts = Cart.objects.all()
+    sales = Sale.objects.filter(customer_id=customer)
+
+    # Lấy tất cả các Cart liên quan đến Sale của khách hàng
+    orders = Order.objects.filter(sale_id__in=sales)
     form_list = []
     for order in orders:
         form = CartForm(initial={
