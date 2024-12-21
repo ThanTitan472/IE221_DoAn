@@ -14,51 +14,77 @@
   </head>
   <body>
     <!-- Sidebar -->
+    <!--For admin-->
     <div class="sidebar">
-      <h2>Admin Panel</h2>
-      <ul class="nav flex-column">
-        <li class="nav-item">
-          {% if user.is_authenticated %}
-          <a class="nav-link" href="{% url 'medicines:home' %}" ">Trang chủ</a>
-          {% else %}
-          <a class="nav-link" href="{% url 'medicines:login' %}" ">Trang chủ</a>
-          {% endif %}
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'medicines:show-medicine' %}" ">Mua thuốc</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'medicines:user_list' %}" ">Tài khoản</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'medicines:show-cart' %}" ">Giỏ hàng</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'medicines:show-order' %}" ">Lịch sử đơn hàng</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'medicines:view_profile' %}" ">Cá nhân</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'medicines:show-category' %}" ">Kho hàng</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'medicines:show-employee' %}" ">Nhân viên</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'medicines:show-customer' %}" ">Khách hàng</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'medicines:show-supplier' %}" ">Nhà cung cấp</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'medicines:show-sale' %}" ">Thông tin bán hàng</a>
-        </li>
-        <li class="nav-item ">
-          <a class="nav-link" href="{% url 'medicines:logout' %}" ">Đăng xuất</a>
-        </li>
-      </ul>
+      {% if user.is_authenticated %}
+        {% if user.is_staff %}
+          <h2>Admin Panel</h2>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:home' %}">Trang chủ</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:show-medicine' %}">Quản lí thuốc</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:user_list' %}">Tài khoản</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:show-order' %}">Lịch sử đơn hàng</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:view_profile' %}">Cá nhân</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:show-category' %}">Kho hàng</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:show-employee' %}">Nhân viên</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:show-customer' %}">Khách hàng</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:show-supplier' %}">Nhà cung cấp</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:show-sale' %}">Thông tin bán hàng</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:logout' %}">Đăng xuất</a>
+            </li>
+          </ul>
+        {% else %}
+          <h2>User Panel</h2>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:home' %}">Trang chủ</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:show-medicine' %}">Mua thuốc</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:user_list' %}">Tài khoản</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:show-cart' %}">Giỏ hàng</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:show-order' %}">Lịch sử đơn hàng</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:view_profile' %}">Cá nhân</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medicines:logout' %}">Đăng xuất</a>
+            </li>
+          </ul>
+        {% endif %}
+      {% else %}
+        <p>Bạn chưa đăng nhập. Vui lòng <a href="{% url 'medicines:login' %}">đăng nhập</a> để tiếp tục.</p>
+      {% endif %}
     </div>
+    
     <!-- Main Content -->
     <div class="main-content">{% block content %} {% endblock %}</div>
 
