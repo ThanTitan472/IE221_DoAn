@@ -13,7 +13,8 @@ Xóa tài khoản
 <p>Bạn có chắc chắn muốn xóa tài khoản "{{ user.username }}" không?</p>
 <form method="POST">
     {% csrf_token %}
+    
     <button type="submit">Xóa</button>
+    <a href="{% url 'medicines:user_list' %}">Hủy bỏ</a>
 </form>
-<a href="{% url 'medicines:user_list' %}">Hủy bỏ</a>
 {%endblock%}
