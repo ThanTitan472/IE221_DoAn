@@ -15,6 +15,8 @@ from datetime import datetime
 from django.shortcuts import render, redirect
 
 def home_view(request):
+    """Xử lý hiển thị trang chủ
+    Yêu cầu phải đăng nhập"""
     if not request.user or not request.user.is_authenticated:
         return redirect("/login")
 
@@ -26,6 +28,7 @@ def home_view(request):
     return render(request, 'home.html', {'text': text})
 class LoginView:
   def register_view(response):
+    """Xử lý quá trình đăng ký"""
     if response.method =="POST":
       form =  RegisterForm(response.POST)
       if form.is_valid():
@@ -42,6 +45,7 @@ class LoginView:
     return render(response, "register.html", {"form":form})
 
   def login_view(request):
+    """Xử lý quá trình đăng nhập"""
     if request.method == 'POST':
       form = LoginForm(request.POST)
       if form.is_valid():
@@ -64,14 +68,18 @@ class LoginView:
     return render(request, 'login.html', {'form': form})
 
   def logout_view(response):
+    """Xử lý quá trình đăng xuất"""
     logout(response)
     return redirect("/login")
 class UserView:
   def view_profile(request):
+    """Xử lý hiển thị thông tin tài khoản cá nhân
+    Yêu cầu phải đăng nhập"""
     if not request.user or not request.user.is_authenticated:
         return redirect("/login")
     return render(request, 'profile.html', {'user': request.user})
   def edit_profile(request):
+    """Xử lý chỉnh sửa mật khẩu"""
     if request.method == 'POST':
       form = ProfilePasswordChangeForm(data=request.POST, user=request.user)
       if form.is_valid():
@@ -84,10 +92,14 @@ class UserView:
     return render(request, 'edit_profile.html', {'form': form})
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def user_list(request):
+    """Xử lý hiển thị danh sách tài khoản người dùng
+    Yêu cầu phải là admin"""
     users = User.objects.all()  # Lấy toàn bộ User từ database
     return render(request, 'user_list.html', {'users': users})
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def delete_user(request, pk):
+    """Xử lý xóa tài khoản người dùng
+    Yêu cầu phải là admin"""
     user = get_object_or_404(User, pk=pk)
     if request.method == "POST":
         if user.is_superuser:
@@ -101,6 +113,9 @@ class UserView:
 
 class MedicineView:
   def show_medicine(request):
+    """Xử lý hiển thị danh mục thuốc
+    Yêu cầu phải đăng nhập
+    Gửi toàn bộ qua content. Tiếp tục phân biệt và xử lý cho các đối tượng"""
     if not request.user or not request.user.is_authenticated:
         return redirect("/login")
     medicines = Medicine.objects.all()
@@ -129,6 +144,8 @@ class MedicineView:
     })
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
+    """Xử lý thêm đối tượng vào danh mục thuốc
+    Yêu cầu phải là admin"""
     if request.method == 'POST':
       form = MedicineForm(request.POST)
       if form.is_valid():
@@ -139,6 +156,8 @@ class MedicineView:
     return render(request, 'add_medicine.html', {'form': form})
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def update_medicine(request, key_id):
+    """Xử lý chỉnh sửa đối tượng trong danh mục thuộc
+    Yêu cầu phải là admin"""
     if request.method == 'POST':
       row = get_object_or_404(Medicine, pk=key_id)
       form = MedicineForm(request.POST,instance=row)
@@ -151,6 +170,8 @@ class MedicineView:
     return render(request,'update_medicine.html',{'form':form})
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def delete_medicine(request,key_id):
+    """Xử lý xóa đối tượng trong danh mục thuốc
+    Yêu cầu phải là admin"""
     row = get_object_or_404(Medicine, pk=key_id)
     if request.method == 'POST':
       row.delete()
@@ -159,6 +180,8 @@ class MedicineView:
 class CategoryView:
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def show_medicine(request):
+    """Xử lý hiển thị danh mục kho hàng
+    Yêu cầu phải là admin"""
     categorys = Category.objects.all()
     
     form_list = []
@@ -182,6 +205,8 @@ class CategoryView:
     })
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
+    """Xử lý thêm đối tượng vào danh mục kho hàng
+    Yêu cầu phải là admin"""
     if request.method == 'POST':
       form = CategoryForm(request.POST)
       if form.is_valid():
@@ -192,6 +217,8 @@ class CategoryView:
     return render(request, 'add_medicine.html', {'form': form})
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def update_medicine(request, key_id):
+    """Xử lý chỉnh sửa đối tượng trong danh mục kho hàng
+    Yêu cầu phải là admin"""
     if request.method == 'POST':
       row = get_object_or_404(Category, pk=key_id)
       form = CategoryForm(request.POST,instance=row)
@@ -204,6 +231,8 @@ class CategoryView:
     return render(request,'update_medicine.html',{'form':form})
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def delete_medicine(request,key_id):
+    """Xử lý xóa đối tượng trong danh mục kho hàng
+    Yêu cầu phải là admin"""
     row = get_object_or_404(Category, pk=key_id)
     if request.method == 'POST':
       row.delete()
@@ -212,6 +241,8 @@ class CategoryView:
 class SupplierView:
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def show_medicine(request):
+    """Xử lý hiển thị danh mục nhà cung cấp
+    Yêu cầu phải là admin"""
     suppliers = Supplier.objects.all()
     
     form_list = []
@@ -236,6 +267,8 @@ class SupplierView:
     })
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
+    """Xử lý thêm đối tượng vào danh mục nhà cung cấp
+    Yêu cầu phải là admin"""
     if request.method == 'POST':
       form = SupplierForm(request.POST)
       if form.is_valid():
@@ -246,6 +279,8 @@ class SupplierView:
     return render(request, 'add_medicine.html', {'form': form})
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def update_medicine(request, key_id):
+    """Xử lý chỉnh sửa đối tượng trong danh mục nhà cung cấp
+    Yêu cầu phải là admin"""
     if request.method == 'POST':
       row = get_object_or_404(Supplier, pk=key_id)
       form = SupplierForm(request.POST,instance=row)
@@ -258,6 +293,8 @@ class SupplierView:
     return render(request,'update_medicine.html',{'form':form})
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def delete_medicine(request,key_id):
+    """Xử lý xóa đối tượng trong danh mục nhà cung cấp
+    Yêu cầu phải là admin"""
     row = get_object_or_404(Supplier, pk=key_id)
     if request.method == 'POST':
       row.delete()
@@ -267,6 +304,8 @@ class SupplierView:
 class CustomerView:
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def show_medicine(request):
+    """Xử lý hiển thị danh mục khách hàng
+    Yêu cầu phải là admin"""
     customers = Customer.objects.all()
     
     form_list = []
@@ -291,6 +330,8 @@ class CustomerView:
     })
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
+    """Xử lý thêm đối tượng vào danh mục khách hàng
+    Yêu cầu phải là admin"""
     if request.method == 'POST':
       form = CustomerForm(request.POST)
       if form.is_valid():
@@ -301,6 +342,8 @@ class CustomerView:
     return render(request, 'add_medicine.html', {'form': form})
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def update_medicine(request, key_id):
+    """Xử lý chỉnh sửa đối tượng trong danh mục khách hàng
+    Yêu cầu phải là admin"""
     if request.method == 'POST':
       row = get_object_or_404(Customer, pk=key_id)
       form = CustomerForm(request.POST,instance=row)
@@ -313,6 +356,8 @@ class CustomerView:
     return render(request,'update_medicine.html',{'form':form})
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def delete_medicine(request,key_id):
+    """Xử lý xóa đối tượng trong danh mục khách hàng
+    Yêu cầu phải là admin"""
     row = get_object_or_404(Customer, pk=key_id)
     if request.method == 'POST':
       row.delete()
@@ -322,6 +367,8 @@ class CustomerView:
 class EmployeeView:
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def show_medicine(request):
+    """Xử lý hiển thị danh mục nhân viên
+    Yêu cầu phải là admin"""
     employees = Employee.objects.all()
     
     form_list = []
@@ -349,6 +396,8 @@ class EmployeeView:
     })
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def add_medicine(request):
+    """Xử lý thêm đối tượng vào danh mục nhân viên
+    Yêu cầu phải là admin"""
     if request.method == 'POST':
       form = EmployeeForm(request.POST)
       if form.is_valid():
@@ -359,6 +408,8 @@ class EmployeeView:
     return render(request, 'add_medicine.html', {'form': form})
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def update_medicine(request, key_id):
+    """Xử lý chỉnh sửa đối tượng trong danh mục nhân viên
+    Yêu cầu phải là admin"""
     if request.method == 'POST':
       row = get_object_or_404(Employee, pk=key_id)
       form = EmployeeForm(request.POST,instance=row)
@@ -371,6 +422,8 @@ class EmployeeView:
     return render(request,'update_medicine.html',{'form':form})
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def delete_medicine(request,key_id):
+    """Xử lý xóa đối tượng trong danh mục nhân viên
+    Yêu cầu phải là admin"""
     row = get_object_or_404(Employee, pk=key_id)
     if request.method == 'POST':
       row.delete()
@@ -378,6 +431,8 @@ class EmployeeView:
     return render(request, 'delete_medicine.html',{'object':row})
 class CartView():
   def add_medicine(request, key_id):
+    """Xử lý quá trình thêm đơn hàng thuốc vào giỏ hàng từ màn hình hiển thị danh mục thuốc của register user
+    Yêu cầu phải là register user"""
     if request.method == 'POST':
         customer_count = Customer.objects.count() + 1
         customer_id = f'CU{customer_count:03d}'
@@ -413,6 +468,8 @@ class CartView():
 
     return redirect('/medicine')
   def show_medicine(request):
+    """Xử lý hiển thị danh mục giỏ hàng
+    Yêu cầu phải là register user"""
     if not request.user or not request.user.is_authenticated:
         return redirect("/login")
     try:
@@ -451,6 +508,8 @@ class CartView():
         'sum_o': sum_o
     })
   def update_medicine(request, id):
+    """Xử lý chỉnh sửa đối tượng trong danh mục giỏ hàng
+    Yêu cầu phải là register user"""
     row = get_object_or_404(Cart, pk=id)  # Lấy Cart hiện tại
     if request.method == 'POST':
         form = CartForm(request.POST)  # Khởi tạo form với dữ liệu POST
@@ -465,11 +524,15 @@ class CartView():
             'count': row.count
         })
   def delete_medicine(request, id):
+    """Xử lý xóa đối tượng trong danh mục giỏ hàng
+    Yêu cầu phải là register user"""
     row = get_object_or_404(Cart, pk=id)
     if request.method == 'POST':
       row.delete()
       return redirect('/cart')
   def pay_medicine(request):
+    """Xử lý quá trình thanh toán danh mục giỏ hàng
+    Yêu cầu phải là register user"""
     if request.method == 'POST':
       carts = Cart.objects.all()
       for cart in carts:
@@ -497,6 +560,8 @@ class CartView():
     return redirect('/cart')
 class OrderView():
   def show_medicine(request):
+    """Xử lý hiển thị danh mục lịch sử đơn hàng
+    Yêu cầu phải là register user"""
     # orders = Order.objects.all()
     if not request.user or not request.user.is_authenticated:
         return redirect("/login")
@@ -526,6 +591,8 @@ class OrderView():
 class SaleView:
   @user_required_permission(allowed_roles=['admin'], message="Bạn không có quyền truy cập.")
   def show_medicine(request):
+    """Xử lý hiển thị danh mục thông tin bán hàng
+    Yêu cầu phải là admin"""
     sales = Sale.objects.all()
     form_list = []
     for sale in sales:
